@@ -1,56 +1,95 @@
-<html>
-	<head>
-		<script src="js/jquery-3.1.0.min.js"></script>
-        <link rel="stylesheet" href="css/bootstrap.min.css" />
-	</head>
-	<body>
-        <label for="principal">Principal</label>
-        <input type="number" class="form-control" id="principal" placeholder="Principal" value="320000">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rent or Buy</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery-3.1.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <form action="javascript:;" onsubmit="calculate()">
+            <div class="form-group">
+                <label for="principal">Principal</label>
+                <div class="input-group">
+                    <div class="input-group-addon">$</div>
+                    <input type="number" class="form-control" id="principal" placeholder="Principal" value="320000">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="term">Mortgage Term (Years)</label>
+                <input type="number" class="form-control" id="term" placeholder="Mortgage Term (Years)" value="30">
+            </div>
+            <div class="form-group">
+                <label for="interestRate">Annual Interest Rate</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="interestRate" placeholder="Annual Interest Rate" value="3.5">
+                    <div class="input-group-addon">%</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="paymentsPerYear">Payments Per Year</label>
+                <input type="number" class="form-control" id="paymentsPerYear" placeholder="Payments Per Year" value="12">
+            </div>
+            <div class="form-group">
+                <label for="rentPayment">Rent Payment</label>
 
-        <label for="term">Mortgage Term (Years)</label>
-        <input type="number" class="form-control" id="term" placeholder="Mortgage Term (Years)" value="30">
-
-        <label for="interestRate">Annual Interest Rate</label>
-        <input type="number" class="form-control" id="interestRate" placeholder="Annual Interest Rate" value="3.5">
-
-        <label for="paymentsPerYear">Payments Per Year</label>
-        <input type="number" class="form-control" id="paymentsPerYear" placeholder="Payments Per Year" value="12">
-
-        <label for="rentPayment">Rent Payment</label>
-        <input type="number" class="form-control" id="rentPayment" placeholder="Rent Payment" value="650">
-
-        <br />
-        <button id="submit" type="submit" class="btn btn-default">Calculate</button>
-
-        <br />
-        <br />
-        <label for="amountSavedPerDollarInDownPayment">Amount Saved per Dollar in Down Payment</label>
-        <input id="amountSavedPerDollarInDownPayment" type="text" class="form-control" readonly>
-
-        <label for="valueOfDollarInDownPayment">Value of Dollar in Down Payment</label>
-        <input id="valueOfDollarInDownPayment" type="text" class="form-control" readonly>
-
-        <label for="mustSavePerDollarOfRent">Must Save Per Dollar of Rent</label>
-        <input id="mustSavePerDollarOfRent" type="text" class="form-control" readonly>
-
-        <label for="mustSave">Must Save</label>
-        <input id="mustSave" type="text" class="form-control" readonly>
-
-        <label for="monthlyPayment">Mortgage Payment</label>
-        <input id="monthlyPayment" type="text" class="form-control" readonly>
-
-        <label for="rentPaymentPlusSavings">Rent Payment + Amount That Must Be Saved</label>
-        <input id="rentPaymentPlusSavings" type="text" class="form-control" readonly>
-	</body>
-</html>
-
-
+                <div class="input-group">
+                    <div class="input-group-addon">$</div>
+                    <input type="number" class="form-control" id="rentPayment" placeholder="Rent Payment" value="650">
+                </div>
+            </div>
+            <div class="form-group">
+                <button id="submit" type="submit" class="btn btn-default">Calculate</button>
+            </div>
+        </form>
+        <div class="well">
+            <div class="form-group">
+                <label for="amountSavedPerDollarInDownPayment">Amount Saved per Dollar in Down Payment</label>
+                <div class="input-group">
+                    <div class="input-group-addon">$</div>
+                    <input id="amountSavedPerDollarInDownPayment" type="text" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="valueOfDollarInDownPayment">Value of Dollar in Down Payment</label>
+                <div class="input-group">
+                    <div class="input-group-addon">$</div>
+                    <input id="valueOfDollarInDownPayment" type="text" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="mustSavePerDollarOfRent">Must Save Per Dollar of Rent</label>
+                <div class="input-group">
+                    <div class="input-group-addon">$</div>
+                    <input id="mustSavePerDollarOfRent" type="text" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="mustSave">Must Save</label>
+                <div class="input-group">
+                    <div class="input-group-addon">$</div>
+                    <input id="mustSave" type="text" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="monthlyPayment">Mortgage Payment</label>
+                <div class="input-group">
+                    <div class="input-group-addon">$</div>
+                    <input id="monthlyPayment" type="text" class="form-control" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="rentPaymentPlusSavings">Rent Payment + Amount That Must Be Saved</label>
+                <div class="input-group">
+                    <div class="input-group-addon">$</div>
+                    <input id="rentPaymentPlusSavings" type="text" class="form-control" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
 <script>
-    $(function ()
-    {
-        $("#submit").click(calculate);
-    });
-
     function clearReadOnly()
     {
         $("input[readonly]").val("");
@@ -90,14 +129,14 @@
             var numberOfPayments = paymentsPerYear * loanTermInYears;
 
             return startingPrincipal *
-                ( 
-                    interestRatePerPayment
-                    * Math.pow(1 + interestRatePerPayment, numberOfPayments)
+            ( 
+                interestRatePerPayment
+                * Math.pow(1 + interestRatePerPayment, numberOfPayments)
                 )
             /
             (
                 Math.pow(1 + interestRatePerPayment, numberOfPayments) - 1
-            );
+                );
             //P = B[(r/12)(1 + r/12)^m)]/[(1 + r/12)^m - 1]
         }
 
@@ -208,3 +247,4 @@
         //var costPuttingRentIntoDownPayment = getTotalInterest(originalPrincipal - rentPayment);
     }
 </script>
+</html>
