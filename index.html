@@ -1,1 +1,86 @@
-Hello World
+<html>
+	<head>
+		<script src="js/jquery-3.1.0.min.js"></script>
+	</head>
+	<body>
+        <script>
+        $(function(){
+            console.log("working");
+        });
+        </script>
+	</body>
+</html>
+
+
+<script>
+    var originalPrincipal = 320000;
+    var loanTermInYears = 30;
+    var annualInterestRate = .03;
+    var paymentsPerYear = 12;
+    var payment;
+    var extraPayment = 0;
+
+    function getInterestForPayment(currentBalance)
+    {
+        return (annualInterestRate / paymentsPerYear) * currentBalance;
+    }
+
+    function getPrincipalForPayment(currentBalance)
+    {
+        return payment - getInterestForPayment(currentBalance);
+    }
+
+    function getMonthlyPayment()
+    {
+        var interestRatePerPayment = annualInterestRate / paymentsPerYear;
+        var numberOfPayments = paymentsPerYear * loanTermInYears;
+
+        return originalPrincipal * 
+            ( 
+                interestRatePerPayment
+                * Math.pow(1 + interestRatePerPayment, numberOfPayments)
+            )
+        /
+        (
+            Math.pow(1 + interestRatePerPayment, numberOfPayments) - 1
+        );
+        //P = B[(r/12)(1 + r/12)^m)]/[(1 + r/12)^m - 1]
+    }
+
+    function round(value, decimals)
+    {
+        return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+    }
+
+    function add(a, b)
+    {
+        return a + b;
+    }
+
+    payment = getMonthlyPayment();
+
+    var numPayments = paymentsPerYear * loanTermInYears;
+    var balances = [originalPrincipal];
+    var paymentsPrincipal = [null];
+    var paymentsInterest = [null];
+    for (var i = 1; i <= numPayments; i++)
+    {
+        var prevBalance = balances[i - 1];
+        var paymentPrincipal = getPrincipalForPayment(prevBalance);
+        var paymentInterest = getInterestForPayment(prevBalance);
+
+        paymentsPrincipal[i] = paymentPrincipal;
+        paymentsInterest[i] = paymentInterest;
+        balances[i] = prevBalance - paymentPrincipal;
+
+        if(balances[i] <= 0)
+        {
+            balances[i] = 0;
+            break;
+        }
+    }
+
+    var totalPrincipal = paymentsPrincipal.reduce(add);
+    var totalInterest = paymentsInterest.reduce(add);
+    var payoff = balances.length - 1;
+</script>
