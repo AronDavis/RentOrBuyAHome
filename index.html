@@ -1,143 +1,210 @@
 <html>
 	<head>
 		<script src="js/jquery-3.1.0.min.js"></script>
+        <link rel="stylesheet" href="css/bootstrap.min.css" />
 	</head>
 	<body>
-        <script>
-        $(function(){
-            console.log("working");
-        });
-        </script>
+        <label for="principal">Principal</label>
+        <input type="number" class="form-control" id="principal" placeholder="Principal" value="320000">
+
+        <label for="term">Mortgage Term (Years)</label>
+        <input type="number" class="form-control" id="term" placeholder="Mortgage Term (Years)" value="30">
+
+        <label for="interestRate">Annual Interest Rate</label>
+        <input type="number" class="form-control" id="interestRate" placeholder="Annual Interest Rate" value="3.5">
+
+        <label for="paymentsPerYear">Payments Per Year</label>
+        <input type="number" class="form-control" id="paymentsPerYear" placeholder="Payments Per Year" value="12">
+
+        <label for="rentPayment">Rent Payment</label>
+        <input type="number" class="form-control" id="rentPayment" placeholder="Rent Payment" value="650">
+
+        <br />
+        <button id="submit" type="submit" class="btn btn-default">Calculate</button>
+
+        <br />
+        <br />
+        <label for="amountSavedPerDollarInDownPayment">Amount Saved per Dollar in Down Payment</label>
+        <input id="amountSavedPerDollarInDownPayment" type="text" class="form-control" readonly>
+
+        <label for="valueOfDollarInDownPayment">Value of Dollar in Down Payment</label>
+        <input id="valueOfDollarInDownPayment" type="text" class="form-control" readonly>
+
+        <label for="mustSavePerDollarOfRent">Must Save Per Dollar of Rent</label>
+        <input id="mustSavePerDollarOfRent" type="text" class="form-control" readonly>
+
+        <label for="mustSave">Must Save</label>
+        <input id="mustSave" type="text" class="form-control" readonly>
+
+        <label for="monthlyPayment">Mortgage Payment</label>
+        <input id="monthlyPayment" type="text" class="form-control" readonly>
+
+        <label for="rentPaymentPlusSavings">Rent Payment + Amount That Must Be Saved</label>
+        <input id="rentPaymentPlusSavings" type="text" class="form-control" readonly>
 	</body>
 </html>
 
 
 <script>
-    var originalPrincipal = 320000;
-    var loanTermInYears = 30;
-    var annualInterestRate = .03;
-    var paymentsPerYear = 12;
-    var extraPayment = 0;
-
-    var rentPayment = 335;
-
-    function getInterestForPayment(currentBalance)
+    $(function ()
     {
-        return (annualInterestRate / paymentsPerYear) * currentBalance;
-    }
+        $("#submit").click(calculate);
+    });
 
-    function getPrincipalForPayment(currentBalance, payment)
+    function clearReadOnly()
     {
-        return payment - getInterestForPayment(currentBalance);
-    }
-
-    function getMonthlyPayment(startingPrincipal)
-    {
-        var interestRatePerPayment = annualInterestRate / paymentsPerYear;
-        var numberOfPayments = paymentsPerYear * loanTermInYears;
-
-        return startingPrincipal *
-            ( 
-                interestRatePerPayment
-                * Math.pow(1 + interestRatePerPayment, numberOfPayments)
-            )
-        /
-        (
-            Math.pow(1 + interestRatePerPayment, numberOfPayments) - 1
-        );
-        //P = B[(r/12)(1 + r/12)^m)]/[(1 + r/12)^m - 1]
-    }
-
-    function round(value, decimals)
-    {
-        return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
-    }
-
-    function add(a, b)
-    {
-        return a + b;
+        $("input[readonly]").val("");
     }
 
 
-    function getTotalInterest(startingPrincipal)
+    function calculate()
     {
-        var payment = getMonthlyPayment(startingPrincipal);
+        var originalPrincipal = Number($("#principal").val()); // 320000;
+        var loanTermInYears = Number($("#term").val()); // 30;
+        var annualInterestRate = Number($("#interestRate").val()) / 100; // .03;
+        var paymentsPerYear = Number($("#paymentsPerYear").val()); // 12;
+        var extraPayment = 0;
 
-        var numPayments = paymentsPerYear * loanTermInYears;
-        var balances = [startingPrincipal];
-        var paymentsPrincipal = [null];
-        var paymentsInterest = [null];
-        for (var i = 1; i <= numPayments; i++)
+        var rentPayment = Number($("#rentPayment").val()); // 650;
+
+        clearReadOnly();
+        if (rentPayment >= originalPrincipal)
         {
-            var prevBalance = balances[i - 1];
-            var paymentPrincipal = getPrincipalForPayment(prevBalance, payment);
-            var paymentInterest = getInterestForPayment(prevBalance);
-
-            paymentsPrincipal[i] = paymentPrincipal;
-            paymentsInterest[i] = paymentInterest;
-            balances[i] = prevBalance - paymentPrincipal;
-
-            if (balances[i] <= 0)
-            {
-                balances[i] = 0;
-                break;
-            }
+            console.log("Rent payment is equal or greater than the principal...why are you renting, idiot?");
+            return;
         }
 
-        var totalPrincipal = paymentsPrincipal.reduce(add);
-        var totalInterest = paymentsInterest.reduce(add);
-        var payoff = balances.length - 1;
+        function getInterestForPayment(currentBalance)
+        {
+            return (annualInterestRate / paymentsPerYear) * currentBalance;
+        }
 
-        return totalInterest;
-    }
+        function getPrincipalForPayment(currentBalance, payment)
+        {
+            return payment - getInterestForPayment(currentBalance);
+        }
+
+        function getMonthlyPayment(startingPrincipal)
+        {
+            var interestRatePerPayment = annualInterestRate / paymentsPerYear;
+            var numberOfPayments = paymentsPerYear * loanTermInYears;
+
+            return startingPrincipal *
+                ( 
+                    interestRatePerPayment
+                    * Math.pow(1 + interestRatePerPayment, numberOfPayments)
+                )
+            /
+            (
+                Math.pow(1 + interestRatePerPayment, numberOfPayments) - 1
+            );
+            //P = B[(r/12)(1 + r/12)^m)]/[(1 + r/12)^m - 1]
+        }
+
+        function round(value, decimals)
+        {
+            return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+        }
+
+        function add(a, b)
+        {
+            return a + b;
+        }
 
 
-    var amountSavedPerDollarInDownPayment = getTotalInterest(1);
-    var valueOfDollarInDownPayment = amountSavedPerDollarInDownPayment + 1;
+        function getTotalInterest(startingPrincipal)
+        {
+            var payment = getMonthlyPayment(startingPrincipal);
 
-    var trueCostOfRent = rentPayment * valueOfDollarInDownPayment;
+            var numPayments = paymentsPerYear * loanTermInYears;
+            var balances = [startingPrincipal];
+            var paymentsPrincipal = [null];
+            var paymentsInterest = [null];
+            for (var i = 1; i <= numPayments; i++)
+            {
+                var prevBalance = balances[i - 1];
+                var paymentPrincipal = getPrincipalForPayment(prevBalance, payment);
+                var paymentInterest = getInterestForPayment(prevBalance);
 
-    //if I put rent into down payment, this is how much money it would save me in interest
-    var interestSavingsByPuttingRentTowardsHouse = trueCostOfRent - rentPayment;
+                paymentsPrincipal[i] = paymentPrincipal;
+                paymentsInterest[i] = paymentInterest;
+                balances[i] = prevBalance - paymentPrincipal;
 
-    /*
-    var interestChanges = [getTotalInterest(originalPrincipal)];
+                if (balances[i] <= 0)
+                {
+                    balances[i] = 0;
+                    break;
+                }
+            }
+
+            var totalPrincipal = paymentsPrincipal.reduce(add);
+            var totalInterest = paymentsInterest.reduce(add);
+            var payoff = balances.length - 1;
+
+            return totalInterest;
+        }
+
+        var monthlyPayment = getMonthlyPayment(originalPrincipal);
+        $("#monthlyPayment").val(monthlyPayment);
+
+        var amountSavedPerDollarInDownPayment = getTotalInterest(1);
+        var valueOfDollarInDownPayment = amountSavedPerDollarInDownPayment + 1;
+
+        $("#amountSavedPerDollarInDownPayment").val(amountSavedPerDollarInDownPayment);
+        $("#valueOfDollarInDownPayment").val(valueOfDollarInDownPayment);
+
+        var trueCostOfRent = rentPayment * valueOfDollarInDownPayment;
+
+        //if I put rent into down payment, this is how much money it would save me in interest
+        var interestSavingsByPuttingRentTowardsHouse = trueCostOfRent - rentPayment;
+
+        /*
+        var interestChanges = [getTotalInterest(originalPrincipal)];
     
-    for(var i = 1; i <= 12; i++)
-    {
-        var rentNotAppliedToPrincipal = rentPayment * i;
+        for(var i = 1; i <= 12; i++)
+        {
+            var rentNotAppliedToPrincipal = rentPayment * i;
 
-        interestChanges[i] = getTotalInterest(originalPrincipal - rentNotAppliedToPrincipal);
+            interestChanges[i] = getTotalInterest(originalPrincipal - rentNotAppliedToPrincipal);
+        }
+
+        console.log(interestChanges);
+
+        var diff = [];
+
+        for(var i = 0; i < 12; i++)
+        {
+            //how much I'm losing by paying for rent
+            diff[i] = (interestChanges[i] - interestChanges[i + 1]) - rentPayment;
+        }
+
+        console.log(diff);
+        */
+
+
+        var mustSavePerDollarOfRent = valueOfDollarInDownPayment / amountSavedPerDollarInDownPayment;
+
+        var mustSave = rentPayment * mustSavePerDollarOfRent;
+
+        $("#mustSavePerDollarOfRent").val(mustSavePerDollarOfRent);
+        $("#mustSave").val(mustSave);
+
+        var rentPaymentPlusSavings = rentPayment + mustSave;
+        $("#rentPaymentPlusSavings").val(rentPaymentPlusSavings);
+        
+        if (mustSave >= originalPrincipal)
+        {
+            console.log("Amount to be saved is equal or greater than the principal...why are you renting, idiot?");
+            return;
+        }
+
+        var totalCostPayingRentAndSaving = getTotalInterest(Math.max(originalPrincipal - mustSave, 0)) + rentPayment;
+        var totalCostPuttingRentIntoDownPayment = getTotalInterest(Math.max(originalPrincipal - rentPayment, 0));
+
+        console.log(Math.round(totalCostPayingRentAndSaving - totalCostPuttingRentIntoDownPayment));
+        console.log(mustSave);
+
+        //var costPayingRentAndSaving = getTotalInterest(originalPrincipal - mustSave) + rentPayment;
+        //var costPuttingRentIntoDownPayment = getTotalInterest(originalPrincipal - rentPayment);
     }
-
-    console.log(interestChanges);
-
-    var diff = [];
-
-    for(var i = 0; i < 12; i++)
-    {
-        //how much I'm losing by paying for rent
-        diff[i] = (interestChanges[i] - interestChanges[i + 1]) - rentPayment;
-    }
-
-    console.log(diff);
-    */
-
-
-    var mustSavePerDollarOfRent = valueOfDollarInDownPayment / amountSavedPerDollarInDownPayment;
-
-    var mustSave = rentPayment * mustSavePerDollarOfRent;
-
-    console.log(amountSavedPerDollarInDownPayment);
-    console.log(valueOfDollarInDownPayment);
-    console.log(mustSavePerDollarOfRent);
-
-    var totalCostPayingRentAndSaving = getTotalInterest(originalPrincipal - mustSave) + rentPayment;
-    var totalCostPuttingRentIntoDownPayment = getTotalInterest(originalPrincipal - rentPayment);
-
-    console.log(Math.round(totalCostPayingRentAndSaving - totalCostPuttingRentIntoDownPayment));
-    console.log(mustSave);
-    var costPayingRentAndSaving = getTotalInterest(originalPrincipal - mustSave) + rentPayment;
-    var costPuttingRentIntoDownPayment = getTotalInterest(originalPrincipal - rentPayment);
-    
 </script>
