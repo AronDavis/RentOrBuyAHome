@@ -17,25 +17,26 @@
     var loanTermInYears = 30;
     var annualInterestRate = .03;
     var paymentsPerYear = 12;
-    var payment;
     var extraPayment = 0;
+
+    var rentPayment = 335;
 
     function getInterestForPayment(currentBalance)
     {
         return (annualInterestRate / paymentsPerYear) * currentBalance;
     }
 
-    function getPrincipalForPayment(currentBalance)
+    function getPrincipalForPayment(currentBalance, payment)
     {
         return payment - getInterestForPayment(currentBalance);
     }
 
-    function getMonthlyPayment()
+    function getMonthlyPayment(startingPrincipal)
     {
         var interestRatePerPayment = annualInterestRate / paymentsPerYear;
         var numberOfPayments = paymentsPerYear * loanTermInYears;
 
-        return originalPrincipal * 
+        return startingPrincipal *
             ( 
                 interestRatePerPayment
                 * Math.pow(1 + interestRatePerPayment, numberOfPayments)
@@ -57,30 +58,86 @@
         return a + b;
     }
 
-    payment = getMonthlyPayment();
 
-    var numPayments = paymentsPerYear * loanTermInYears;
-    var balances = [originalPrincipal];
-    var paymentsPrincipal = [null];
-    var paymentsInterest = [null];
-    for (var i = 1; i <= numPayments; i++)
+    function getTotalInterest(startingPrincipal)
     {
-        var prevBalance = balances[i - 1];
-        var paymentPrincipal = getPrincipalForPayment(prevBalance);
-        var paymentInterest = getInterestForPayment(prevBalance);
+        var payment = getMonthlyPayment(startingPrincipal);
 
-        paymentsPrincipal[i] = paymentPrincipal;
-        paymentsInterest[i] = paymentInterest;
-        balances[i] = prevBalance - paymentPrincipal;
-
-        if(balances[i] <= 0)
+        var numPayments = paymentsPerYear * loanTermInYears;
+        var balances = [startingPrincipal];
+        var paymentsPrincipal = [null];
+        var paymentsInterest = [null];
+        for (var i = 1; i <= numPayments; i++)
         {
-            balances[i] = 0;
-            break;
+            var prevBalance = balances[i - 1];
+            var paymentPrincipal = getPrincipalForPayment(prevBalance, payment);
+            var paymentInterest = getInterestForPayment(prevBalance);
+
+            paymentsPrincipal[i] = paymentPrincipal;
+            paymentsInterest[i] = paymentInterest;
+            balances[i] = prevBalance - paymentPrincipal;
+
+            if (balances[i] <= 0)
+            {
+                balances[i] = 0;
+                break;
+            }
         }
+
+        var totalPrincipal = paymentsPrincipal.reduce(add);
+        var totalInterest = paymentsInterest.reduce(add);
+        var payoff = balances.length - 1;
+
+        return totalInterest;
     }
 
-    var totalPrincipal = paymentsPrincipal.reduce(add);
-    var totalInterest = paymentsInterest.reduce(add);
-    var payoff = balances.length - 1;
+
+    var amountSavedPerDollarInDownPayment = getTotalInterest(1);
+    var valueOfDollarInDownPayment = amountSavedPerDollarInDownPayment + 1;
+
+    var trueCostOfRent = rentPayment * valueOfDollarInDownPayment;
+
+    //if I put rent into down payment, this is how much money it would save me in interest
+    var interestSavingsByPuttingRentTowardsHouse = trueCostOfRent - rentPayment;
+
+    /*
+    var interestChanges = [getTotalInterest(originalPrincipal)];
+    
+    for(var i = 1; i <= 12; i++)
+    {
+        var rentNotAppliedToPrincipal = rentPayment * i;
+
+        interestChanges[i] = getTotalInterest(originalPrincipal - rentNotAppliedToPrincipal);
+    }
+
+    console.log(interestChanges);
+
+    var diff = [];
+
+    for(var i = 0; i < 12; i++)
+    {
+        //how much I'm losing by paying for rent
+        diff[i] = (interestChanges[i] - interestChanges[i + 1]) - rentPayment;
+    }
+
+    console.log(diff);
+    */
+
+
+    var mustSavePerDollarOfRent = valueOfDollarInDownPayment / amountSavedPerDollarInDownPayment;
+
+    var mustSave = rentPayment * mustSavePerDollarOfRent;
+
+    console.log(amountSavedPerDollarInDownPayment);
+    console.log(valueOfDollarInDownPayment);
+    console.log(mustSavePerDollarOfRent);
+
+    var totalCostPayingRentAndSaving = getTotalInterest(originalPrincipal - mustSave) + rentPayment;
+    var totalCostPuttingRentIntoDownPayment = getTotalInterest(originalPrincipal - rentPayment);
+
+    console.log(Math.round(totalCostPayingRentAndSaving - totalCostPuttingRentIntoDownPayment));
+    console.log(mustSave);
+    var costPayingRentAndSaving = getTotalInterest(originalPrincipal - mustSave) + rentPayment;
+    var costPuttingRentIntoDownPayment = getTotalInterest(originalPrincipal - rentPayment);
+    
 </script>
